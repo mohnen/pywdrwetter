@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pywdrwetter"
 version = "0.1.0"
-description = ""
+description = "A simple command line webscraper for the weather forecast on wdr.de"
 authors = ["Markus Mohnen <markus.mohnen@gmail.com>"]
 
 [tool.poetry.dependencies]

@@ -1,7 +1,10 @@
+import json
+import sys
+
 import click
 import mechanicalsoup
 import pandas as pd
-import json
+
 
 URL = "https://www.wdr.de/"
 
@@ -16,18 +19,26 @@ def main(location, format):
     browser["_query"]=location
     browser.submit_selected()
     page = browser.get_current_page()
-    info = page.find("span", class_="heading-text").text.strip()
-    updated = page.find("div", class_="map-updated-at").text.strip()
-    table = page.find_all('table')
-    df = pd.read_html(str(table))[0].set_index("Datum")
-    df.index = map(lambda x: x.replace("&shy", "").replace(";\xad","").replace("\xad","").replace("- ", ""), df.index)
-    if format == "text":
-        print(info)
-        print(updated)
-        print(df)
-    else:
-        data = { "info": info, "updated": updated, "data": json.loads(df.to_json(orient="columns")) }
-        print(json.dumps(data, ensure_ascii=False, indent=4))
+    try:
+        info = page.find("span", class_="heading-text").text.strip()
+        updated = page.find("div", class_="map-updated-at").text.strip()
+        table = page.find_all('table')
+        df = pd.read_html(str(table))[0].set_index("Datum")
+        df.index = map(lambda x: x.replace("&shy", "").replace(";\xad","").replace("\xad","").replace("- ", ""), df.index)
+        if format == "text":
+            print(info)
+            print(updated)
+            print(df)
+        else:
+            data = { "info": info, "updated": updated, "data": json.loads(df.to_json(orient="columns")) }
+            print(json.dumps(data, ensure_ascii=False, indent=4))
+    except AttributeError:
+        if format == "text":
+            print(f"Cannot find a place like '{location}'")
+        else:
+            data = { "error": f"Cannot find a place like '{location}'" }
+            print(json.dumps(data, ensure_ascii=False, indent=4))
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
