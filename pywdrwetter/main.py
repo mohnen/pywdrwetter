@@ -23,14 +23,16 @@ def main(location, format):
         info = page.find("span", class_="heading-text").text.strip()
         updated = page.find("div", class_="map-updated-at").text.strip()
         table = page.find_all('table')
+        url = browser.get_url()
         df = pd.read_html(str(table))[0].set_index("Datum")
         df.index = map(lambda x: x.replace("&shy", "").replace(";\xad","").replace("\xad","").replace("- ", ""), df.index)
         if format == "text":
             print(info)
             print(updated)
             print(df)
+            print(url)
         else:
-            data = { "info": info, "updated": updated, "data": json.loads(df.to_json(orient="columns")) }
+            data = { "info": info, "updated": updated, "url": url, "data": json.loads(df.to_json(orient="columns")) }
             print(json.dumps(data, ensure_ascii=False, indent=4))
     except AttributeError:
         if format == "text":
